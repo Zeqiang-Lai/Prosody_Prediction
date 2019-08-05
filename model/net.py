@@ -34,7 +34,8 @@ class Net(nn.Module):
         super(Net, self).__init__()
 
         # the embedding takes as input the vocab_size and the embedding_dim
-        self.embedding = nn.Embedding(params.vocab_size, params.embedding_dim)
+        weight = torch.tensor(np.load(params.embedding_path), dtype=torch.float)
+        self.embedding = nn.Embedding.from_pretrained(weight)
 
         # the LSTM takes as input the size of its input (embedding_dim), its hidden size
         # for more details on how to use it, check out the documentation
