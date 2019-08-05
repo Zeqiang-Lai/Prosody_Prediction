@@ -42,8 +42,9 @@ class Net(nn.Module):
         self.lstm = nn.LSTM(params.embedding_dim, params.lstm_hidden_dim, bidirectional=True, batch_first=True)
 
         # the fully connected layer transforms the output to give the final output layer
-        self.fc = nn.Linear(params.lstm_hidden_dim*2, params.number_of_tags)
-        
+        self.fc1 = nn.Linear(params.lstm_hidden_dim*2, params.fc1)
+        self.fc2 = nn.Linear(params.fc1, params.number_of_tags)
+
     def forward(self, s):
         """
         This function defines how we use the components of our network to operate on an input batch.
@@ -74,7 +75,8 @@ class Net(nn.Module):
         s = s.view(-1, s.shape[2])       # dim: batch_size*seq_len x lstm_hidden_dim
 
         # apply the fully connected layer and obtain the output (before softmax) for each token
-        s = self.fc(s)                   # dim: batch_size*seq_len x num_tags
+        s = self.fc1(s)                   # dim: batch_size*seq_len x num_tags
+        s = self.fc2(s)                   # dim: batch_size*seq_len x num_tags
 
         # apply log softmax on each token's output (this is recommended over applying softmax
         # since it is numerically more stable)
