@@ -1,0 +1,10 @@
+{
+    "train_size": 7000,
+    "dev_size": 1500,
+    "test_size": 1500,
+    "vocab_size": 22936,
+    "number_of_tags": 3,
+    "pad_word": "<pad>",
+    "pad_tag": "O",
+    "unk_word": "UNK"
+}
