@@ -10,9 +10,9 @@ import utils
 
 PYTHON = sys.executable
 parser = argparse.ArgumentParser()
-parser.add_argument('--parent_dir', default='experiments/learning_rate',
+parser.add_argument('--parent_dir', default='experiments/lstm_size',
                     help='Directory containing params.json')
-parser.add_argument('--data_dir', default='data/small', help="Directory containing the dataset")
+parser.add_argument('--data_dir', default='data/biaobei2', help="Directory containing the dataset")
 
 
 def launch_training_job(parent_dir, data_dir, job_name, params):
@@ -47,12 +47,12 @@ if __name__ == "__main__":
     params = utils.Params(json_path)
 
     # Perform hypersearch over one parameter
-    learning_rates = [1e-4, 1e-3, 1e-2]
+    lstm_sizes = [128, 256]
 
-    for learning_rate in learning_rates:
+    for lstm_size in lstm_sizes:
         # Modify the relevant parameter in params
-        params.learning_rate = learning_rate
+        params.lstm_hidden_dim = lstm_size
 
         # Launch job (name has to be unique)
-        job_name = "learning_rate_{}".format(learning_rate)
+        job_name = "lstm_size_{}".format(lstm_size)
         launch_training_job(args.parent_dir, args.data_dir, job_name, params)

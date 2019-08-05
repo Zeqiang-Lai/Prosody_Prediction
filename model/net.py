@@ -39,10 +39,10 @@ class Net(nn.Module):
 
         # the LSTM takes as input the size of its input (embedding_dim), its hidden size
         # for more details on how to use it, check out the documentation
-        self.lstm = nn.LSTM(params.embedding_dim, params.lstm_hidden_dim, batch_first=True)
+        self.lstm = nn.LSTM(params.embedding_dim, params.lstm_hidden_dim, bidirectional=True, batch_first=True)
 
         # the fully connected layer transforms the output to give the final output layer
-        self.fc = nn.Linear(params.lstm_hidden_dim, params.number_of_tags)
+        self.fc = nn.Linear(params.lstm_hidden_dim*2, params.number_of_tags)
         
     def forward(self, s):
         """
