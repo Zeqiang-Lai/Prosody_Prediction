@@ -47,7 +47,7 @@ if __name__ == "__main__":
     params = utils.Params(json_path)
 
     # Perform hypersearch over one parameter
-    lstm_sizes = [128, 256]
+    lstm_sizes = [512, 256, 128]
 
     for lstm_size in lstm_sizes:
         # Modify the relevant parameter in params
