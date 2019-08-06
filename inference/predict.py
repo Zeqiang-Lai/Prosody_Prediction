@@ -57,8 +57,8 @@ def concate(words, tags):
 if __name__ == '__main__':
     args = parser.parse_args()
 
-    net1 = ProsodyNet(args.model_dir + '1')
-    net2 = ProsodyNet(args.model_dir + '2')
-    net3 = ProsodyNet(args.model_dir + '3')
+    net1 = ProsodyNet(args.model_dir, 'pw')
+    net2 = ProsodyNet(args.model_dir, 'pph')
+    net3 = ProsodyNet(args.model_dir, 'iph')
 
     run([(net1, 'PW'), (net2, 'PPH'), (net3, 'IPH')], _tokenize())

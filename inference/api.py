@@ -8,13 +8,13 @@ import utils
 
 
 class ProsodyNet:
-    def __init__(self, model_dir):
+    def __init__(self, model_dir, weight_dir):
         restore_file = 'best'
-        json_path = os.path.join(model_dir, 'params.json')
+        json_path = os.path.join(model_dir, weight_dir, 'params.json')
         assert os.path.isfile(json_path), "No json configuration file found at {}".format(json_path)
         params = utils.Params(json_path)
         params.cuda = torch.cuda.is_available()
-        params.embedding_path = 'model2/embedding200.npy'
+        params.embedding_path = os.path.join(model_dir, 'embedding200.npy')
 
         torch.manual_seed(230)
         if params.cuda:
@@ -22,7 +22,7 @@ class ProsodyNet:
 
         print("Loading pretrained model...")
         self.model = net.Net(params).cuda() if params.cuda else net.Net(params)
-        utils.load_checkpoint(os.path.join(model_dir, restore_file + '.pth.tar'), self.model)
+        utils.load_checkpoint(os.path.join(model_dir, weight_dir, restore_file + '.pth.tar'), self.model)
         print('- Done.')
         total_params = sum(p.numel() for p in self.model.parameters())
         train_total_params = sum(p.numel() for p in self.model.parameters() if p.requires_grad)
