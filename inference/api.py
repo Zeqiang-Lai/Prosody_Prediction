@@ -1,16 +1,14 @@
-import argparse
-import logging
 import os
 
 import numpy as np
 import torch
-import utils
+
 import model.net as net
-from model.data_loader import DataLoader
+import utils
 
 
 class ProsodyNet:
-    def __init__(self, model_dir, data_dir):
+    def __init__(self, model_dir):
         restore_file = 'best'
         json_path = os.path.join(model_dir, 'params.json')
         assert os.path.isfile(json_path), "No json configuration file found at {}".format(json_path)
@@ -28,7 +26,7 @@ class ProsodyNet:
         print('- Done.')
         total_params = sum(p.numel() for p in self.model.parameters())
         train_total_params = sum(p.numel() for p in self.model.parameters() if p.requires_grad)
-        print(self.model)
+        # print(self.model)
         print('Parameters: {0}'.format(total_params))
         print('Trainable Parameters: {0}'.format(train_total_params))
 
