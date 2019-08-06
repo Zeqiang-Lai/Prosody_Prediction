@@ -74,6 +74,8 @@ if __name__ == '__main__':
     # use GPU if available
     params.cuda = torch.cuda.is_available()     # use GPU is available
 
+    params.embedding_path = 'embedding/embedding200.npy'
+
     # Set the random seed for reproducible experiments
     torch.manual_seed(230)
     if params.cuda: torch.cuda.manual_seed(230)
