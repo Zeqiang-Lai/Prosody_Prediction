@@ -6,13 +6,14 @@ import sys
 import torch
 from torch.autograd import Variable
 
-import utils 
+import utils
 
 
 class DataLoader(object):
     """
     Handles all aspects of the data. Stores the dataset_params, vocabulary and tags with their mappings to indices.
     """
+
     def __init__(self, data_dir, params):
         """
         Loads dataset_params, vocabulary and tags. Ensure you have run `build_vocab.py` on data_dir before using this
@@ -27,19 +28,19 @@ class DataLoader(object):
         # loading dataset_params
         json_path = os.path.join(data_dir, 'dataset_params.json')
         assert os.path.isfile(json_path), "No json file found at {}, run build_vocab.py".format(json_path)
-        self.dataset_params = utils.Params(json_path)        
-        
+        self.dataset_params = utils.Params(json_path)
+
         # loading vocab (we require this to map words to their indices)
         vocab_path = os.path.join(data_dir, 'words.txt')
         self.vocab = {}
         with open(vocab_path) as f:
             for i, l in enumerate(f.read().splitlines()):
                 self.vocab[l] = i
-        
+
         # setting the indices for UNKnown words and PADding symbols
         self.unk_ind = self.vocab[self.dataset_params.unk_word]
         self.pad_ind = self.vocab[self.dataset_params.pad_word]
-                
+
         # loading tags (we require this to map tags to their indices)
         tags_path = os.path.join(data_dir, 'tags.txt')
         self.tag_map = {}
@@ -47,10 +48,19 @@ class DataLoader(object):
             for i, t in enumerate(f.read().splitlines()):
                 self.tag_map[t] = i
 
+        # loading pos (we require this to map pos to their indices)
+        pos_path = os.path.join(data_dir, 'pos.txt')
+        self.pos_map = {}
+        with open(pos_path) as f:
+            for i, t in enumerate(f.read().splitlines()):
+                self.pos_map[t] = i
+
+        self.pad_pos = self.pos_map[self.dataset_params.pad_pos]
+
         # adding dataset parameters to param (e.g. vocab size, )
         params.update(json_path)
 
-    def load_sentences_labels(self, sentences_file, labels_file, d):
+    def load_sentences_labels_pos(self, sentences_file, labels_file, pos_file, d):
         """
         Loads sentences and labels from their corresponding files. Maps tokens and tags to their indices and stores
         them in the provided dict d.
@@ -63,30 +73,38 @@ class DataLoader(object):
 
         sentences = []
         labels = []
+        pos = []
 
         with open(sentences_file) as f:
             for sentence in f.read().splitlines():
                 # replace each token by its index if it is in vocab
                 # else use index of UNK_WORD
-                s = [self.vocab[token] if token in self.vocab 
+                s = [self.vocab[token] if token in self.vocab
                      else self.unk_ind
                      for token in sentence.split(' ')]
                 sentences.append(s)
-        
+
         with open(labels_file) as f:
             for sentence in f.read().splitlines():
                 # replace each label by its index
                 l = [self.tag_map[label] for label in sentence.split(' ')]
-                labels.append(l)        
+                labels.append(l)
+
+        with open(pos_file) as f:
+            for sentence in f.read().splitlines():
+                # replace each label by its index
+                l = [self.pos_map[pos] for pos in sentence.split(' ')]
+                pos.append(l)
 
         # checks to ensure there is a tag for each token
-        assert len(labels) == len(sentences)
+        assert len(labels) == len(sentences) == len(pos)
         for i in range(len(labels)):
-            assert len(labels[i]) == len(sentences[i])
+            assert len(labels[i]) == len(sentences[i]) == len(pos[i])
 
         # storing sentences and labels in dict d
         d['data'] = sentences
         d['labels'] = labels
+        d['pos'] = pos
         d['size'] = len(sentences)
 
     def load_data(self, types, data_dir):
@@ -102,13 +120,14 @@ class DataLoader(object):
 
         """
         data = {}
-        
+
         for split in ['train', 'val', 'test']:
             if split in types:
                 sentences_file = os.path.join(data_dir, split, "sentences.txt")
                 labels_file = os.path.join(data_dir, split, "labels.txt")
+                pos_file = os.path.join(data_dir, split, "pos.txt")
                 data[split] = {}
-                self.load_sentences_labels(sentences_file, labels_file, data[split])
+                self.load_sentences_labels_pos(sentences_file, labels_file, pos_file, data[split])
 
         return data
 
@@ -135,33 +154,39 @@ class DataLoader(object):
             random.shuffle(order)
 
         # one pass over data
-        for i in range((data['size']+1)//params.batch_size):
+        for i in range((data['size'] + 1) // params.batch_size):
             # fetch sentences and tags
-            batch_sentences = [data['data'][idx] for idx in order[i*params.batch_size:(i+1)*params.batch_size]]
-            batch_tags = [data['labels'][idx] for idx in order[i*params.batch_size:(i+1)*params.batch_size]]
+            batch_sentences = [data['data'][idx] for idx in order[i * params.batch_size:(i + 1) * params.batch_size]]
+            batch_tags = [data['labels'][idx] for idx in order[i * params.batch_size:(i + 1) * params.batch_size]]
+            batch_poses = [data['pos'][idx] for idx in order[i * params.batch_size:(i + 1) * params.batch_size]]
 
             # compute length of longest sentence in batch
             batch_max_len = max([len(s) for s in batch_sentences])
 
             # prepare a numpy array with the data, initialising the data with pad_ind and all labels with -1
             # initialising labels to -1 differentiates tokens with tags from PADding tokens
-            batch_data = self.pad_ind*np.ones((len(batch_sentences), batch_max_len))
-            batch_labels = -1*np.ones((len(batch_sentences), batch_max_len))
+            batch_data = self.pad_ind * np.ones((len(batch_sentences), batch_max_len))
+            batch_labels = -1 * np.ones((len(batch_sentences), batch_max_len))
+            batch_pos = self.pad_pos * np.ones((len(batch_sentences), batch_max_len))
 
             # copy the data to the numpy array
             for j in range(len(batch_sentences)):
                 cur_len = len(batch_sentences[j])
                 batch_data[j][:cur_len] = batch_sentences[j]
                 batch_labels[j][:cur_len] = batch_tags[j]
+                batch_pos[j][:cur_len] = batch_poses[j]
 
             # since all data are indices, we convert them to torch LongTensors
             batch_data, batch_labels = torch.LongTensor(batch_data), torch.LongTensor(batch_labels)
+            batch_pos = torch.LongTensor(batch_pos)
 
             # shift tensors to GPU if available
             if params.cuda:
                 batch_data, batch_labels = batch_data.cuda(), batch_labels.cuda()
+                batch_pos = batch_pos.cuda()
 
             # convert them to Variables to record operations in the computational graph
             batch_data, batch_labels = Variable(batch_data), Variable(batch_labels)
-    
-            yield batch_data, batch_labels
+            batch_pos = Variable(batch_pos)
+
+            yield batch_data, batch_labels, batch_pos

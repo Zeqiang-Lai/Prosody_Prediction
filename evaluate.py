@@ -38,10 +38,10 @@ def evaluate(model, loss_fn, data_iterator, metrics, params, num_steps):
     # compute metrics over the dataset
     for _ in range(num_steps):
         # fetch the next evaluation batch
-        data_batch, labels_batch = next(data_iterator)
+        data_batch, labels_batch, pos_batch = next(data_iterator)
         
         # compute model output
-        output_batch = model(data_batch)
+        output_batch = model(data_batch, pos_batch)
         loss = loss_fn(output_batch, labels_batch)
 
         # extract data from torch Variable, move to cpu, convert to numpy arrays

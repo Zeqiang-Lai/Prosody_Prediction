@@ -17,7 +17,7 @@ from evaluate import evaluate
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--data_dir', default='data/biaobei2', help="Directory containing the dataset")
-parser.add_argument('--model_dir', default='experiments/fc', help="Directory containing params.json")
+parser.add_argument('--model_dir', default='experiments/pos', help="Directory containing params.json")
 parser.add_argument('--restore_file', default=None,
                     help="Optional, name of the file in --model_dir containing weights to reload before \
                     training")  # 'best' or 'train'
@@ -47,10 +47,10 @@ def train(model, optimizer, loss_fn, data_iterator, metrics, params, num_steps):
     t = trange(num_steps) 
     for i in t:
         # fetch the next training batch
-        train_batch, labels_batch = next(data_iterator)
+        train_batch, labels_batch, pos_batch = next(data_iterator)
 
         # compute model output and loss
-        output_batch = model(train_batch)
+        output_batch = model(train_batch, pos_batch)
         loss = loss_fn(output_batch, labels_batch)
 
         # clear previous gradients, compute gradients of all variables wrt loss

@@ -49,7 +49,7 @@ def save_dataset(dataset, save_dir):
 
 if __name__ == "__main__":
 
-    path_dataset = 'data/biaobei/final_tag_3_pos.txt'
+    path_dataset = 'data/biaobei/final_tag_2_pos.txt'
     msg = "{} file not found. Make sure you have downloaded the right dataset".format(path_dataset)
     assert os.path.isfile(path_dataset), msg
 
@@ -64,6 +64,6 @@ if __name__ == "__main__":
     test_dataset = dataset[int(0.85*len(dataset)):]
 
     # Save the datasets to files
-    save_dataset(train_dataset, 'data/biaobei3/train')
-    save_dataset(val_dataset, 'data/biaobei3/val')
-    save_dataset(test_dataset, 'data/biaobei3/test')
+    save_dataset(train_dataset, 'data/biaobei2/train')
+    save_dataset(val_dataset, 'data/biaobei2/val')
+    save_dataset(test_dataset, 'data/biaobei2/test')
