@@ -5,16 +5,20 @@ from inference.api import ProsodyNet
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--data_dir', default='data/biaobei2', help="Directory containing the dataset")
-parser.add_argument('--model_dir', default='model', help="Directory containing params.json")
+parser.add_argument('--model_dir', default='model2', help="Directory containing params.json")
 
 
 def _tokenize():
-    tokenzier = thulac.thulac(seg_only=True)
+    tokenzier = thulac.thulac()
 
     def _tokenize(text):
-        words = tokenzier.cut(text, text=True)
-        words = words.strip().split()
-        return words
+        words = []
+        pos = []
+        pairs = tokenzier.cut(text)
+        for pair in pairs:
+            words.append(pair[0])
+            pos.append(pair[1])
+        return words, pos
 
     return _tokenize
 
@@ -22,9 +26,9 @@ def _tokenize():
 def run(net, tokenize):
     while True:
         text = input('>> ')
-        words = tokenize(text)
+        words, pos = tokenize(text)
         print(words)
-        tags = net.inference(words)
+        tags = net.inference(words, pos)
         print(tags)
 
 

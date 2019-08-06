@@ -16,7 +16,7 @@ class ProsodyNet:
         assert os.path.isfile(json_path), "No json configuration file found at {}".format(json_path)
         params = utils.Params(json_path)
         params.cuda = torch.cuda.is_available()
-        params.embedding_path = 'model/embedding200.npy'
+        params.embedding_path = 'model2/embedding200.npy'
 
         torch.manual_seed(230)
         if params.cuda:
@@ -35,10 +35,12 @@ class ProsodyNet:
         self.params = params
         self._load_dict(model_dir)
 
-    def inference(self, x):
-        x = self.words2idx(x)
+    def inference(self, words, pos):
+        x = self.words2idx(words)
+        pos = self.poss2idx(pos)
         input_batch = torch.tensor([x], dtype=torch.long)
-        output_batch = self.model(input_batch)
+        pos_batch = torch.tensor([pos], dtype=torch.long)
+        output_batch = self.model(input_batch, pos_batch)
         out = output_batch.cpu().detach().numpy()
         out = np.argmax(out, axis=1)
         out = self.idxs2tag(out)
@@ -47,9 +49,11 @@ class ProsodyNet:
     def _load_dict(self, model_dir):
         tag_path = os.path.join(model_dir, 'tags.txt')
         words_path = os.path.join(model_dir, 'words.txt')
+        pos_path = os.path.join(model_dir, 'pos.txt')
 
         self.idx2tag = load_tag_idx(tag_path)
         self.word2idx = load_word_idx(words_path)
+        self.pos2idx = load_word_idx(pos_path)
 
     def words2idx(self, words):
         x = []
@@ -58,6 +62,15 @@ class ProsodyNet:
                 x.append(self.word2idx[word])
             else:
                 x.append(self.word2idx['UNK'])
+        return np.array(x)
+
+    def poss2idx(self, pos):
+        x = []
+        for p in pos:
+            if p in self.pos2idx.keys():
+                x.append(self.pos2idx[p])
+            else:
+                raise RuntimeError('error converting pos to idx')
         return np.array(x)
 
     def idxs2tag(self, idxes):
@@ -77,6 +90,7 @@ def load_word_idx(path_words):
             word = word.strip().split()[0]
             word_idx[word] = i
         return word_idx
+
 
 def load_tag_idx(path_tags):
     with open(path_tags, 'r') as f:
