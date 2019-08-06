@@ -13,12 +13,14 @@ def load_dataset(path_txt):
         for line in lines:
             sent = []
             tag = []
+            pos = []
             pairs = line.strip().split(' ')
             for pair in pairs:
                 items = pair.split('_')
                 sent.append(items[0])
                 tag.append(items[1])
-            dataset.append((sent, tag))
+                pos.append(items[2])
+            dataset.append((sent, tag, pos))
     return dataset
 
 
@@ -37,15 +39,17 @@ def save_dataset(dataset, save_dir):
     # Export the dataset
     with open(os.path.join(save_dir, 'sentences.txt'), 'w') as file_sentences:
         with open(os.path.join(save_dir, 'labels.txt'), 'w') as file_labels:
-            for words, tags in dataset:
-                file_sentences.write("{}\n".format(" ".join(words)))
-                file_labels.write("{}\n".format(" ".join(tags)))
+            with open(os.path.join(save_dir, 'pos.txt'), 'w') as file_pos:
+                for words, tags, pos in dataset:
+                    file_sentences.write("{}\n".format(" ".join(words)))
+                    file_labels.write("{}\n".format(" ".join(tags)))
+                    file_pos.write("{}\n".format(" ".join(pos)))
     print("- done.")
 
 
 if __name__ == "__main__":
 
-    path_dataset = 'data/biaobei/final_tag_2.txt'
+    path_dataset = 'data/biaobei/final_tag_3_pos.txt'
     msg = "{} file not found. Make sure you have downloaded the right dataset".format(path_dataset)
     assert os.path.isfile(path_dataset), msg
 
@@ -60,6 +64,6 @@ if __name__ == "__main__":
     test_dataset = dataset[int(0.85*len(dataset)):]
 
     # Save the datasets to files
-    save_dataset(train_dataset, 'data/biaobei2/train')
-    save_dataset(val_dataset, 'data/biaobei2/val')
-    save_dataset(test_dataset, 'data/biaobei2/test')
+    save_dataset(train_dataset, 'data/biaobei3/train')
+    save_dataset(val_dataset, 'data/biaobei3/val')
+    save_dataset(test_dataset, 'data/biaobei3/test')

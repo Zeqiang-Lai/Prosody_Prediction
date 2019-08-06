@@ -9,11 +9,12 @@ import os
 parser = argparse.ArgumentParser()
 parser.add_argument('--min_count_word', default=1, help="Minimum count for words in the dataset", type=int)
 parser.add_argument('--min_count_tag', default=1, help="Minimum count for tags in the dataset", type=int)
-parser.add_argument('--data_dir', default='data/biaobei2', help="Directory containing the dataset")
+parser.add_argument('--data_dir', default='data/biaobei3', help="Directory containing the dataset")
 
 # Hyper parameters for the vocab
 PAD_WORD = '<pad>'
 PAD_TAG = 'O'
+PAD_POS = 'w'
 UNK_WORD = 'UNK'
 
 
@@ -77,19 +78,29 @@ if __name__ == '__main__':
     size_test_tags = update_vocab(os.path.join(args.data_dir, 'test/labels.txt'), tags)
     print("- done.")
 
+    # Build pos vocab with train and test datasets
+    print("Building pos vocabulary...")
+    pos = Counter()
+    size_train_pos = update_vocab(os.path.join(args.data_dir, 'train/pos.txt'), pos)
+    size_dev_pos = update_vocab(os.path.join(args.data_dir, 'val/pos.txt'), pos)
+    size_test_pos = update_vocab(os.path.join(args.data_dir, 'test/pos.txt'), pos)
+    print("- done.")
+
     # Assert same number of examples in datasets
-    assert size_train_sentences == size_train_tags
-    assert size_dev_sentences == size_dev_tags
-    assert size_test_sentences == size_test_tags
+    assert size_train_sentences == size_train_tags == size_train_pos
+    assert size_dev_sentences == size_dev_tags == size_dev_pos
+    assert size_test_sentences == size_test_tags == size_test_pos
 
     # Only keep most frequent tokens
     words = [tok for tok, count in words.items() if count >= args.min_count_word]
     tags = [tok for tok, count in tags.items() if count >= args.min_count_tag]
+    pos = [tok for tok, count in pos.items() if count >= args.min_count_tag]
 
     # Add pad tokens
     if PAD_WORD not in words: words.append(PAD_WORD)
     if PAD_TAG not in tags: tags.append(PAD_TAG)
-    
+    if PAD_POS not in pos: tags.append(PAD_POS)
+
     # add word for unknown words 
     words.append(UNK_WORD)
 
@@ -97,6 +108,7 @@ if __name__ == '__main__':
     print("Saving vocabularies to file...")
     save_vocab_to_txt_file(words, os.path.join(args.data_dir, 'words.txt'))
     save_vocab_to_txt_file(tags, os.path.join(args.data_dir, 'tags.txt'))
+    save_vocab_to_txt_file(pos, os.path.join(args.data_dir, 'pos.txt'))
     print("- done.")
 
     # Save datasets properties in json file
@@ -106,8 +118,10 @@ if __name__ == '__main__':
         'test_size': size_test_sentences,
         'vocab_size': len(words),
         'number_of_tags': len(tags),
+        'number_of_pos': len(pos),
         'pad_word': PAD_WORD,
         'pad_tag': PAD_TAG,
+        'pad_pos': PAD_POS,
         'unk_word': UNK_WORD
     }
     save_dict_to_json(sizes, os.path.join(args.data_dir, 'dataset_params.json'))
