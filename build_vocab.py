@@ -13,7 +13,7 @@ parser.add_argument('--data_dir', default='data/biaobei2', help="Directory conta
 
 # Hyper parameters for the vocab
 PAD_WORD = '<pad>'
-PAD_TAG = 'O'
+# PAD_TAG = 'O'
 PAD_POS = 'w'
 UNK_WORD = 'UNK'
 
@@ -98,7 +98,7 @@ if __name__ == '__main__':
 
     # Add pad tokens
     if PAD_WORD not in words: words.append(PAD_WORD)
-    if PAD_TAG not in tags: tags.append(PAD_TAG)
+    # if PAD_TAG not in tags: tags.append(PAD_TAG)
     if PAD_POS not in pos: tags.append(PAD_POS)
 
     # add word for unknown words 
@@ -120,7 +120,7 @@ if __name__ == '__main__':
         'number_of_tags': len(tags),
         'number_of_pos': len(pos),
         'pad_word': PAD_WORD,
-        'pad_tag': PAD_TAG,
+        # 'pad_tag': PAD_TAG,
         'pad_pos': PAD_POS,
         'unk_word': UNK_WORD
     }
