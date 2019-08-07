@@ -35,7 +35,7 @@ def run(nets, tokenize):
         print(words)
         for net, name in nets:
             tags = net.inference(words, pos)
-            # print(name, tags)
+            print(name, tags)
             print(name, concate(words, tags))
 
 
