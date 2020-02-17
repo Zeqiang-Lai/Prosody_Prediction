@@ -1,7 +1,7 @@
 import argparse
 import os
 
-from inference.api import ProsodyNet
+from core.inference.api import ProsodyNet
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--model_dir', default='inference/model')
@@ -36,5 +36,6 @@ if __name__ == '__main__':
                         f_p.write(" ".join(labels[i]) + '\n')
                         f_p.write(" ".join(sents[i]) + '\n')
                         f_p.write(" ".join(pos[i]) + '\n')
+                        f_p.write("".join(sents[i]) + '\n')
                     if i % 100 == 0:
                         print("Processed {0}/{1}".format(i, len(pos)))

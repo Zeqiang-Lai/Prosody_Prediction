@@ -1,12 +1,11 @@
-import random
-import numpy as np
 import os
-import sys
+import random
 
+import numpy as np
 import torch
 from torch.autograd import Variable
 
-import utils
+from ..utils import Params
 
 
 class DataLoader(object):
@@ -28,7 +27,7 @@ class DataLoader(object):
         # loading dataset_params
         json_path = os.path.join(data_dir, 'dataset_params.json')
         assert os.path.isfile(json_path), "No json file found at {}, run build_vocab.py".format(json_path)
-        self.dataset_params = utils.Params(json_path)
+        self.dataset_params = Params(json_path)
 
         # loading vocab (we require this to map words to their indices)
         vocab_path = os.path.join(data_dir, 'words.txt')

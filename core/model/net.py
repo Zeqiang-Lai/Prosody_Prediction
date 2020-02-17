@@ -18,10 +18,11 @@ class Net(nn.Module):
 
         # the LSTM takes as input the size of its input (embedding_dim), its hidden size
         # for more details on how to use it, check out the documentation
-        self.lstm = nn.LSTM(params.embedding_dim+params.pos_embd_dim, params.lstm_hidden_dim, bidirectional=True, batch_first=True)
+        self.lstm = nn.LSTM(params.embedding_dim + params.pos_embd_dim, params.lstm_hidden_dim, bidirectional=True,
+                            batch_first=True)
 
         # the fully connected layer transforms the output to give the final output layer
-        self.fc1 = nn.Linear(params.lstm_hidden_dim*2, params.fc1)
+        self.fc1 = nn.Linear(params.lstm_hidden_dim * 2, params.fc1)
         self.fc2 = nn.Linear(params.fc1, params.number_of_tags)
 
     def forward(self, s, pos):
@@ -42,27 +43,27 @@ class Net(nn.Module):
         """
         #                                -> batch_size x seq_len
         # apply the embedding layer that maps each token to its embedding
-        s = self.embedding(s)            # dim: batch_size x seq_len x embedding_dim
+        s = self.embedding(s)  # dim: batch_size x seq_len x embedding_dim
         p = self.pos_embedding(pos)
 
         s = torch.cat((s, p), dim=2)
 
         # run the LSTM along the sentences of length seq_len
-        s, _ = self.lstm(s)              # dim: batch_size x seq_len x lstm_hidden_dim
+        s, _ = self.lstm(s)  # dim: batch_size x seq_len x lstm_hidden_dim
 
         # make the Variable contiguous in memory (a PyTorch artefact)
         s = s.contiguous()
 
         # reshape the Variable so that each row contains one token
-        s = s.view(-1, s.shape[2])       # dim: batch_size*seq_len x lstm_hidden_dim
+        s = s.view(-1, s.shape[2])  # dim: batch_size*seq_len x lstm_hidden_dim
 
         # apply the fully connected layer and obtain the output (before softmax) for each token
-        s = self.fc1(s)                   # dim: batch_size*seq_len x num_tags
-        s = self.fc2(s)                   # dim: batch_size*seq_len x num_tags
+        s = self.fc1(s)  # dim: batch_size*seq_len x num_tags
+        s = self.fc2(s)  # dim: batch_size*seq_len x num_tags
 
         # apply log softmax on each token's output (this is recommended over applying softmax
         # since it is numerically more stable)
-        return F.log_softmax(s, dim=1)   # dim: batch_size*seq_len x num_tags
+        return F.log_softmax(s, dim=1)  # dim: batch_size*seq_len x num_tags
 
 
 def loss_fn(outputs, labels):
@@ -95,9 +96,9 @@ def loss_fn(outputs, labels):
     num_tokens = int(torch.sum(mask).item())
 
     # compute cross entropy loss for all tokens (except PADding tokens), by multiplying with mask.
-    return -torch.sum(outputs[range(outputs.shape[0]), labels]*mask)/num_tokens
-    
-    
+    return -torch.sum(outputs[range(outputs.shape[0]), labels] * mask) / num_tokens
+
+
 def accuracy(outputs, labels):
     """
     Compute the accuracy, given the outputs and labels for all tokens. Exclude PADding terms.
@@ -120,17 +121,19 @@ def accuracy(outputs, labels):
     outputs = np.argmax(outputs, axis=1)
 
     # compare outputs with labels and divide by number of tokens (excluding PADding tokens)
-    return np.sum(outputs==labels)/float(np.sum(mask))
+    return np.sum(outputs == labels) / float(np.sum(mask))
+
 
 def block(output):
     idx = []
     s = 0
     for i in range(len(output)):
         if output[i] == 0:
-            idx.append((s,i))
+            idx.append((s, i))
             s = i
     idx.append((s, len(output)))
     return idx
+
 
 def block_acc(outputs, labels):
     outputs = np.argmax(outputs, axis=1)
@@ -151,9 +154,42 @@ def block_acc(outputs, labels):
         total += len(label_idx)
     return correct / total
 
+
+def precision(outputs, labels):
+    outputs = np.argmax(outputs, axis=1)
+    labels = labels.ravel()
+    outputs = outputs.ravel()
+
+    t = 0
+    for i in range(len(labels)):
+        if outputs[i] == labels[i] == 0:
+            t += 1
+
+    return t / np.sum(outputs == 0)
+
+
+def recall(outputs, labels):
+    outputs = np.argmax(outputs, axis=1)
+    labels = labels.ravel()
+    outputs = outputs.ravel()
+
+    t = 0
+    total = 0
+    for i in range(len(labels)):
+        if outputs[i] == labels[i] == 0:
+            t += 1
+        if labels[i] == 0:
+            total += 1
+    if total == 0:
+        return 1
+    return t / total
+
+
 # maintain all metrics required in this dictionary- these are used in the training and evaluation loops
 metrics = {
     'accuracy': accuracy,
     'block_acc': block_acc,
+    'precison': precision,
+    'recall': recall,
     # could add more metrics such as accuracy for each token type
 }

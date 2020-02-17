@@ -9,15 +9,16 @@ import torch
 import torch.optim as optim
 from tqdm import trange
 
-import utils
-import model.net as net
-from model.data_loader import DataLoader
+import core.utils as utils
+import core.model.net as net
+from core.model.data_loader import DataLoader
 from evaluate import evaluate
 
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--data_dir', default='data/biaobei2', help="Directory containing the dataset")
-parser.add_argument('--model_dir', default='experiments/pos', help="Directory containing params.json")
+parser.add_argument('--model_dir', default='experiments/base', help="Directory containing params.json")
+parser.add_argument('--emb_dir', default='embedding/biaobei', help="Directory containing the word embedding")
 parser.add_argument('--restore_file', default=None,
                     help="Optional, name of the file in --model_dir containing weights to reload before \
                     training")  # 'best' or 'train'
@@ -154,7 +155,7 @@ if __name__ == '__main__':
     params.cuda = torch.cuda.is_available()
 
     # setup embedding path
-    params.embedding_path = 'embedding/embedding200.npy'
+    params.embedding_path = os.path.join(args.emb_dir, 'embedding200.npy')
 
     # Set the random seed for reproducible experiments
     torch.manual_seed(230)

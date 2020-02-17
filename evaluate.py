@@ -6,13 +6,14 @@ import os
 
 import numpy as np
 import torch
-import utils
-import model.net as net
-from model.data_loader import DataLoader
+import core.utils as utils
+import core.model.net as net
+from core.model.data_loader import DataLoader
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--data_dir', default='data/biaobei2', help="Directory containing the dataset")
-parser.add_argument('--model_dir', default='experiments/pos', help="Directory containing params.json")
+parser.add_argument('--model_dir', default='experiments/base', help="Directory containing params.json")
+parser.add_argument('--emb_dir', default='embedding/biaobei', help="Directory containing the word embedding")
 parser.add_argument('--restore_file', default='best', help="name of the file in --model_dir \
                      containing weights to load")
 
@@ -39,7 +40,7 @@ def evaluate(model, loss_fn, data_iterator, metrics, params, num_steps):
     for _ in range(num_steps):
         # fetch the next evaluation batch
         data_batch, labels_batch, pos_batch = next(data_iterator)
-        
+
         # compute model output
         output_batch = model(data_batch, pos_batch)
         loss = loss_fn(output_batch, labels_batch)
@@ -55,7 +56,7 @@ def evaluate(model, loss_fn, data_iterator, metrics, params, num_steps):
         summ.append(summary_batch)
 
     # compute mean of all metrics in summary
-    metrics_mean = {metric:np.mean([x[metric] for x in summ]) for metric in summ[0]} 
+    metrics_mean = {metric: np.mean([x[metric] for x in summ]) for metric in summ[0]}
     metrics_string = " ; ".join("{}: {:05.3f}".format(k, v) for k, v in metrics_mean.items())
     logging.info("- Eval metrics : " + metrics_string)
     return metrics_mean
@@ -72,14 +73,14 @@ if __name__ == '__main__':
     params = utils.Params(json_path)
 
     # use GPU if available
-    params.cuda = torch.cuda.is_available()     # use GPU is available
+    params.cuda = torch.cuda.is_available()  # use GPU is available
 
-    params.embedding_path = 'embedding/embedding200.npy'
+    params.embedding_path = os.path.join(args.emb_dir, 'embedding200.npy')
 
     # Set the random seed for reproducible experiments
     torch.manual_seed(230)
     if params.cuda: torch.cuda.manual_seed(230)
-        
+
     # Get the logger
     utils.set_logger(os.path.join(args.model_dir, 'evaluate.log'))
 
@@ -99,10 +100,10 @@ if __name__ == '__main__':
 
     # Define the model
     model = net.Net(params).cuda() if params.cuda else net.Net(params)
-    
+
     loss_fn = net.loss_fn
     metrics = net.metrics
-    
+
     logging.info("Starting evaluation")
 
     # Reload weights from the saved file

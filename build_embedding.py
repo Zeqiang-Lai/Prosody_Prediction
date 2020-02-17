@@ -3,7 +3,7 @@ import os
 
 import numpy as np
 
-import utils
+import core.utils as utils
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--emb_dir', default='embedding', help="Directory containing the word embedding")
@@ -11,6 +11,7 @@ parser.add_argument('--out_dir', default='embedding', help="Directory containing
 parser.add_argument('--words_dir', default='data/biaobei2')
 parser.add_argument('--dim', default=200)
 parser.add_argument('--max_num_words', default=30000)
+
 
 def load_embedding_matrix(path_emb, word_index, emb_dim, max_num_words):
     num_words = min(max_num_words, len(word_index) + 1)
@@ -47,6 +48,7 @@ def load_word_idx(path_words):
             word = word.strip().split()[0]
             word_idx[word] = i
         return word_idx
+
 
 if __name__ == '__main__':
     args = parser.parse_args()

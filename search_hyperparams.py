@@ -5,7 +5,7 @@ import os
 from subprocess import check_call
 import sys
 
-import utils
+import core.utils as utils
 
 
 PYTHON = sys.executable

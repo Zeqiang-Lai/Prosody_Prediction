@@ -1,8 +1,6 @@
 """Read, split and save the biaobei dataset for our model"""
 
-import csv
 import os
-import sys
 
 
 def load_dataset(path_txt):
