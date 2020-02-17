@@ -52,7 +52,7 @@ prosody_pred = ProsodyPred(model_dir)
 
 ## Training
 
-如果你要自己训练，评测模型，构建数据集，请查看 [training-guide.md](Training-Guide.md)
+如果你要自己训练，评测模型，构建数据集，请查看 [training-guide.md](training-guide.md)
 
 
 ## FAQ
