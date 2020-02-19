@@ -18,7 +18,8 @@ biaobei_iph   # 语调短语，用biaobei3训练
 
 - Release的模型：[biaobei_pretrained.tar.gz](http://dvmvd-4602.kmlltpro.corp.kuaishou.com/prosody_prediction/biaobei_pretrained.tar.gz)
 - 使用的数据集：[biaobei_dataset.tar.gz](http://dvmvd-4602.kmlltpro.corp.kuaishou.com/prosody_prediction/biaobei_dataset.tar.gz)
-- Git Commit: 
+- Git Commit: 5e340bab23731c12d0976ba855556d84606a8357 
+  - `git checkout v1.0`
 
 | 模型       |   数据集   | Performance                                                  |
 | ---------- | ---- | ------------------------------------------------------------ |
