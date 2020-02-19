@@ -52,7 +52,7 @@ python build_vocab.py --data_dir 你的数据集的位置
 
 我们使用的是腾讯的[Embedding](https://ai.tencent.com/ailab/nlp/embedding.html)，下载下来，里面有一个`Tencent_AILab_ChineseEmbedding.txt`文件，把它放在`embedding`文件夹下。
 
-然后运行，得到一个`embedding200.npy`:
+然后运行以下脚本，得到一个`embedding200.npy`:
 
 ```shell
 python build_embedding.py --words_dir 你的数据集的位置 --out_dir 你想存储embedding的位置
@@ -60,6 +60,12 @@ python build_embedding.py --words_dir 你的数据集的位置 --out_dir 你想�
 ```
 
 这个脚本的主要作用是提取embedding，并建立一个和之前构建的字典一个顺序的embedding字典。例如`words.txt` 第一个词是 `我`，则npy数组的第一个元素就是`我`的embedding。
+
+**标贝数据集的embedding** 下载方法
+
+```shell
+sh embedding/download_biaobei_embedding.sh
+```
 
 ## Train
 
