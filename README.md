@@ -22,8 +22,13 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-
 ## Quickstart 
+
+1. 下载预训练模型
+
+```shell
+sh pretrained/download_biaobei_pretrained.sh
+```
 
 1. 运行交互式命令行进行测试
 
