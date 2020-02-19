@@ -57,6 +57,8 @@ prosody_pred = ProsodyPred(model_dir)
 
 ## Training
 
+[实验记录](log.md)
+
 如果你要自己训练，评测模型，构建数据集，请查看 [training-guide.md](training-guide.md)
 
 
