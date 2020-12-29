@@ -26,9 +26,7 @@ pip install -r requirements.txt
 
 1. 下载预训练模型
 
-```
 链接: https://pan.baidu.com/s/1YWH65bM-NGZYOAoK8C3rBQ 密码: 6r1w
-```
 
 1. 运行交互式命令行进行测试
 
